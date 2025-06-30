@@ -1,0 +1,11 @@
+requests>=2.32
+watchdog
+rich
+halo
+pyfiglet
+python-docx
+pymupdf
+python-magic
+pillow
+
+   
