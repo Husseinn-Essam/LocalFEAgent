@@ -49,7 +49,7 @@ class LFEA:
         }
         self.capabilities = [
             "search", "organize", "summarize", "chat"]
-    def queryLLM(self, prompt: str) -> str:
+    def queryOllama(self, prompt: str,contextLength: int =1024, numOfTokenOutput: int=150) -> str:
         """Send a query to Ollama API"""
         try:
             response = requests.post(
@@ -59,8 +59,8 @@ class LFEA:
         "prompt": prompt,
         "stream": False,
         "options": {
-            "num_ctx": 1024,
-            "num_predict": 5,
+            "num_ctx": contextLength,
+            "num_predict":numOfTokenOutput,
             # optional—but handy if you want the GPU filled:
             # "num_gpu": 9999
         }
@@ -118,7 +118,7 @@ Content preview:
 
 Answer with only "YES" or "NO" ONLY, without any additional text.:
 """
-                        ai_response = self.queryLLM(prompt)
+                        ai_response = self.queryOllama(prompt,1024, 5)
                         
                         if ai_response.upper().startswith("YES"):
                             print(f"  ✅ AI confirmed relevance: {file_path}")
@@ -162,7 +162,7 @@ Answer with only "YES" or "NO" ONLY, without any additional text.:
                         prompt = f"ONLY REPLY WITH ONE WORD THE CATEGORY! Categorize the following content: {content[:1000]}"
                         if len(currCategories) > 0:
                             prompt += f"\n\n Choose one of the current categories: {', '.join(currCategories)} only if applicable, otherwise create a new category."
-                        category = self.queryLLM(prompt)
+                        category = self.queryOllama(prompt,1024, 5)
                         print(f"  📂 Detected category for {file}: {category}")
                     category_folder = Path(directory) / category.strip()
                     category_folder.mkdir(parents=True, exist_ok=True)
@@ -177,7 +177,7 @@ Answer with only "YES" or "NO" ONLY, without any additional text.:
     def intentDetector(self,query: str) -> str:
         """Detect intent from a query"""
         prompt = f"Detect the intent of the following query: {query}. then return the intent as a single word from the {self.capabilities}. If the intent is not clear, return 'unknown'."
-        response = self.queryLLM(prompt)
+        response = self.queryOllama(prompt,1024, 5)
         print(f"🤖 Detected intent: {response.strip()}")
         return response.strip()
     
@@ -195,7 +195,7 @@ Answer with only "YES" or "NO" ONLY, without any additional text.:
         elif intent == "summarize":
             return "Summarizing files..."
         elif intent == "chat":
-            print(f"🤖 Agent: {self.queryLLM(query)}")
+            print(f"🤖 Agent: {self.queryOllama(query,1024,100)}")
             return "Chatting with the agent..."
         else:
             return "Unknown intent. Please try again."
