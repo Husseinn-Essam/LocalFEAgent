@@ -30,7 +30,7 @@ import argparse
 #     )
 #     console.print(panel)
 
-banner("LFEA")
+# banner("LFEA")
 
 class LFEA:
     def __init__(self, ollama_url: str = "http://localhost:11434"):
@@ -142,8 +142,41 @@ Answer with only "YES" or "NO" ONLY, without any additional text.:
         else:
             return [{"message": "No relevant files found."}]
 
+    def organizeFilesByContent(self,directory:str):
+        """this will create folders based on file content and move files into them"""
+        print(f"Organizing files in directory: {directory}")
+        
+        for root, _, files in os.walk(directory):
+            for file in files:
+                file_path = Path(root) / file
+                file_extension = os.path.splitext(file)[1].lower()
+                if not file_extension in self.categories['documents']:
+                    print(f"  ⏭️  Skipping non-document file: {file_path}")
+                    continue
+                
+                currCategories= []
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        prompt = f"ONLY REPLY WITH ONE WORD THE CATEGORY! Categorize the following content: {content[:1000]}"
+                        if len(currCategories) > 0:
+                            prompt += f"\n\n Choose one of the current categories: {', '.join(currCategories)} only if applicable, otherwise create a new category."
+                        category = self.query_LLM(prompt)
+                        print(f"  📂 Detected category for {file}: {category}")
+                    category_folder = Path(directory) / category.strip()
+                    category_folder.mkdir(parents=True, exist_ok=True)
+                    
+                    shutil.move(str(file_path), str(category_folder / file))
+                    print(f"  📂 Moved {file} to {category_folder}")
+                        
+                except (UnicodeDecodeError, FileNotFoundError):
+                    print(f"  ⚠️  Could not read file: {file_path}")
+                    continue
+
+
+
 test = LFEA()
 # print(test.query_ollama("Hello, how are you?"))
-print(test.searchFilesByContent("D:/Personal Projects", "mango"))
+print(test.organizeFilesByContent("D:/Personal Projects/LocalFEAgent/tests"))
 
 # test.query_Kobold("Hello, how are you?")
