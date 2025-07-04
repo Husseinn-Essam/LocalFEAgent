@@ -47,8 +47,9 @@ class LFEA:
             'code': ['.py', '.js', '.html', '.css', '.cpp', '.java', '.c', '.php', '.rb', '.go'],
             'executables': ['.exe', '.msi', '.dmg', '.pkg', '.deb', '.rpm', '.appimage']
         }
-    
-    def query_LLM(self, prompt: str) -> str:
+        self.capabilities = [
+            "search", "organize", "summarize", "chat"]
+    def queryLLM(self, prompt: str) -> str:
         """Send a query to Ollama API"""
         try:
             response = requests.post(
@@ -73,7 +74,7 @@ class LFEA:
         except Exception as e:
             return f"Error connecting to Ollama: {str(e)}"
    
-    def query_Kobold(self, prompt: str) -> str:
+    def queryKobold(self, prompt: str) -> str:
         """Send a query to Kobold API"""
         try:
             url = "http://localhost:5001/api/v1/generate"
@@ -117,7 +118,7 @@ Content preview:
 
 Answer with only "YES" or "NO" ONLY, without any additional text.:
 """
-                        ai_response = self.query_LLM(prompt)
+                        ai_response = self.queryLLM(prompt)
                         
                         if ai_response.upper().startswith("YES"):
                             print(f"  ✅ AI confirmed relevance: {file_path}")
@@ -161,7 +162,7 @@ Answer with only "YES" or "NO" ONLY, without any additional text.:
                         prompt = f"ONLY REPLY WITH ONE WORD THE CATEGORY! Categorize the following content: {content[:1000]}"
                         if len(currCategories) > 0:
                             prompt += f"\n\n Choose one of the current categories: {', '.join(currCategories)} only if applicable, otherwise create a new category."
-                        category = self.query_LLM(prompt)
+                        category = self.queryLLM(prompt)
                         print(f"  📂 Detected category for {file}: {category}")
                     category_folder = Path(directory) / category.strip()
                     category_folder.mkdir(parents=True, exist_ok=True)
@@ -173,10 +174,36 @@ Answer with only "YES" or "NO" ONLY, without any additional text.:
                     print(f"  ⚠️  Could not read file: {file_path}")
                     continue
 
-
+    def intentDetector(self,query: str) -> str:
+        """Detect intent from a query"""
+        prompt = f"Detect the intent of the following query: {query}. then return the intent as a single word from the {self.capabilities}. If the intent is not clear, return 'unknown'."
+        response = self.queryLLM(prompt)
+        print(f"🤖 Detected intent: {response.strip()}")
+        return response.strip()
+    
+    def chatWithAgnet(self) -> str:
+        """Chat with the agent"""
+        print(f"🤖 Agent: Hi how can i help you? \n")
+        query = input("You: ")
+        intent = self.intentDetector(query)
+        if intent == "organize":
+            print(f"🤖 Agent: {self.organizeFilesByContent("./tests",query)}")
+            return "Organizing files based on content..."
+        elif intent == "search":
+            print(f"🤖 Agent: {self.searchFilesByContent("./tests",query)}")
+            return "Searching files based on content..."
+        elif intent == "summarize":
+            return "Summarizing files..."
+        elif intent == "chat":
+            print(f"🤖 Agent: {self.queryLLM(query)}")
+            return "Chatting with the agent..."
+        else:
+            return "Unknown intent. Please try again."
 
 test = LFEA()
+
+test.chatWithAgnet()
 # print(test.query_ollama("Hello, how are you?"))
-print(test.organizeFilesByContent("D:/Personal Projects/LocalFEAgent/tests"))
+# print(test.organizeFilesByContent("D:/Personal Projects/LocalFEAgent/tests"))
 
 # test.query_Kobold("Hello, how are you?")
