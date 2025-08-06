@@ -10,7 +10,7 @@ LLM-powered file management agent that helps you search, organize, and manage yo
 - **Local AI Processing**: Uses Ollama for privacy-focused, offline AI processing
 - **Extensible Categories**: Configurable file categorization system
 
-## 🔧 Prerequisites
+## Prerequisites
 
 Before installing LFEA, ensure you have:
 
@@ -26,9 +26,9 @@ Before installing LFEA, ensure you have:
    ```bash
    ollama pull gemma3n:e2b
    ```
-4. Verify Ollama is running:
+4. Run Ollama server:
    ```bash
-   ollama list
+   ollama serve
    ```
 
 ## Installation
@@ -79,7 +79,7 @@ python main.py --mode search --directory "./documents" --query "meeting notes"
 python main.py --mode organize --directory "./downloads"
 ```
 
-## 💬 Usage Examples
+## Usage Examples
 
 ### Interactive Mode Commands
 
@@ -109,7 +109,7 @@ You: what can you do?
 🤖 Agent: I can help you search for files by content, organize files into categories, and have conversations about file management tasks.
 ```
 
-## ⚙️ Configuration
+## Configuration
 
 ### Default Configuration
 
@@ -150,7 +150,7 @@ File organization supports additional categories:
 - Code files and Archives
 - Executables
 
-## 🔍 Command-Line Options
+## Command-Line Options
 
 ```bash
 python main.py [OPTIONS]
@@ -163,7 +163,7 @@ Options:
   --help                                Show help message
 ```
 
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
